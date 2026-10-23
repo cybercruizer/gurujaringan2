@@ -20,11 +20,11 @@ class PostPolicy
 
     public function update(User $user, Post $post): bool
     {
-        return $user->is($post->user);
+        return $user->is_admin || $user->is($post->user);
     }
 
     public function delete(User $user, Post $post): bool
     {
-        return $user->is($post->user);
+        return $user->is_admin || $user->is($post->user);
     }
 }

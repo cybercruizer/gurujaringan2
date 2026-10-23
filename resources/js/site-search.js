@@ -72,7 +72,7 @@ export default function registerSiteSearch(Alpine) {
             } catch (error) {
                 if (error.name !== 'AbortError' && this.activeRequest === controller) {
                     console.error('Site search failed.', error);
-                    this.error = 'Search could not be completed. Please try again.';
+                    this.error = 'Pencarian tidak dapat dilakukan. Silakan coba lagi.';
                     this.results = [];
                     this.searched = false;
                 }

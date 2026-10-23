@@ -3,12 +3,14 @@
 import Alpine from 'alpinejs';
 import { initializeMediaPickers } from './media-picker.js';
 import registerSiteSearch from './site-search.js';
+import { highlightCodeSamples } from './code-highlighter.js';
 
 window.Alpine = Alpine;
 
 registerSiteSearch(Alpine);
 Alpine.start();
 initializeMediaPickers();
+highlightCodeSamples();
 
 document.querySelectorAll('[data-auto-close-navigation]').forEach((navigation) => {
     navigation.querySelectorAll('details').forEach((menu) => {

@@ -57,6 +57,35 @@ class PostCrudTest extends TestCase
             ->assertDontSee('onclick="alert(1)"', false);
     }
 
+    public function test_published_post_has_social_share_links_and_drafts_do_not(): void
+    {
+        $author = User::factory()->create();
+        $publishedPost = $author->posts()->create([
+            'title' => 'Sharing works',
+            'content' => 'Public content.',
+            'published_at' => now()->subMinute(),
+        ]);
+        $draft = $author->posts()->create([
+            'title' => 'Private draft',
+            'content' => 'Private content.',
+        ]);
+
+        $this->get(route('posts.show', $publishedPost))
+            ->assertOk()
+            ->assertSee('Bagikan artikel ini')
+            ->assertSee('aria-label="Bagikan ke WhatsApp"', false)
+            ->assertSee('aria-label="Bagikan ke Facebook"', false)
+            ->assertSee('aria-label="Bagikan ke X"', false)
+            ->assertSee('aria-label="Bagikan ke Telegram"', false)
+            ->assertSee('aria-label="Bagikan ke LinkedIn"', false)
+            ->assertSee(urlencode($publishedPost->url()), false);
+
+        $this->actingAs($author)
+            ->get(route('posts.show', $draft))
+            ->assertOk()
+            ->assertDontSee('Bagikan artikel ini');
+    }
+
     public function test_code_samples_render_with_language_and_reject_unapproved_classes(): void
     {
         $author = User::factory()->create();
@@ -72,6 +101,24 @@ class PostCrudTest extends TestCase
             ->assertDontSee('bg-red-500', false)
             ->assertDontSee('onclick="alert(1)"', false)
             ->assertDontSee('<script>alert("unsafe")</script>', false);
+    }
+
+    public function test_bash_code_samples_keep_sanitized_highlight_classes(): void
+    {
+        $author = User::factory()->create();
+        $post = $author->posts()->create([
+            'title' => 'Shell example',
+            'content' => '<pre class="language-bash"><code><span class="token keyword">if</span> <span class="token variable">$ready</span>; <span class="token keyword">then</span>
+    <span class="token function">echo</span> <span class="token string">"ship it"</span>
+<span class="token keyword">fi</span></code></pre>',
+            'published_at' => now()->subMinute(),
+        ]);
+
+        $this->get(route('posts.show', $post))
+            ->assertOk()
+            ->assertSee('<pre class="language-bash"><code><span class="token keyword">if</span> <span class="token variable">$ready</span>; <span class="token keyword">then</span>', false)
+            ->assertSee('<span class="token string">"ship it"</span>', false)
+            ->assertDontSee('<script>', false);
     }
 
     public function test_post_page_generates_a_table_of_contents_from_content_headings(): void
@@ -264,6 +311,46 @@ class PostCrudTest extends TestCase
         $thumbnailDimensions = getimagesize(Storage::disk('public')->path($post->featured_image_thumbnail));
         $this->assertSame(640, $thumbnailDimensions[0]);
         $this->assertSame(320, $thumbnailDimensions[1]);
+    }
+
+    public function test_author_can_create_a_post_with_new_category_and_tag(): void
+    {
+        $author = User::factory()->create();
+
+        $this->actingAs($author)->post(route('posts.store'), [
+            'title' => 'Post with quick taxonomy',
+            'content' => 'Article content.',
+            'new_category' => 'Quick Category',
+            'new_tag' => 'Quick Tag',
+        ])->assertRedirect();
+
+        $post = Post::query()->where('slug', 'post-with-quick-taxonomy')->firstOrFail();
+        $category = Category::query()->where('name', 'Quick Category')->firstOrFail();
+        $tag = Tag::query()->where('name', 'Quick Tag')->firstOrFail();
+
+        $this->assertSame('quick-category', $category->slug);
+        $this->assertSame('quick-tag', $tag->slug);
+        $this->assertTrue($post->categories->contains($category));
+        $this->assertTrue($post->tags->contains($tag));
+    }
+
+    public function test_author_can_add_a_category_and_tag_while_updating_a_post(): void
+    {
+        $author = User::factory()->create();
+        $post = $author->posts()->create([
+            'title' => 'Existing article',
+            'content' => 'Article content.',
+        ]);
+
+        $this->actingAs($author)->put(route('posts.update', $post), [
+            'title' => $post->title,
+            'content' => $post->content,
+            'new_category' => 'Updated Category',
+            'new_tag' => 'Updated Tag',
+        ])->assertRedirect();
+
+        $this->assertTrue($post->fresh()->categories->contains('name', 'Updated Category'));
+        $this->assertTrue($post->fresh()->tags->contains('name', 'Updated Tag'));
     }
 
     public function test_author_can_reuse_a_library_image_as_a_featured_image(): void

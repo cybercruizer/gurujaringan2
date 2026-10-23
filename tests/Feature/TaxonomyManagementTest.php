@@ -106,8 +106,12 @@ class TaxonomyManagementTest extends TestCase
             ->assertOk()
             ->assertSee(route('admin.categories.index'), false)
             ->assertSee(route('admin.tags.index'), false)
+            ->assertSee(route('admin.posts.index'), false)
             ->assertSee(route('admin.comments.index'), false)
             ->assertSee(route('admin.dashboard'), false)
-            ->assertSee(route('profile.edit'), false);
+            ->assertSee(route('profile.edit'), false)
+            ->assertSee('Lihat artikel')
+            ->assertSee('Dasbor admin')
+            ->assertSee('Pengaturan blog');
     }
 }

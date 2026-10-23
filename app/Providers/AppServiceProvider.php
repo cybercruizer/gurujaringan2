@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Models\BlogSetting;
 use App\Models\MenuItem;
+use App\Models\Tag;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
@@ -44,12 +46,24 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('components.site-footer', function (ViewInstance $view): void {
+            $publishedArticles = fn (Builder $query): Builder => $query
+                ->published()
+                ->where('type', 'article');
+
             $view->with('footerMenuItems', MenuItem::query()
                 ->where('location', 'footer')
                 ->where('is_visible', true)
                 ->orderBy('position')
                 ->orderBy('id')
                 ->get());
+
+            $view->with('footerTags', Tag::query()
+                ->withCount(['posts as published_articles_count' => $publishedArticles])
+                ->whereHas('posts', $publishedArticles)
+                ->orderByDesc('published_articles_count')
+                ->orderBy('name')
+                ->limit(12)
+                ->get(['id', 'name', 'slug']));
         });
 
         RateLimiter::for('comment-submissions', function (Request $request): Limit {

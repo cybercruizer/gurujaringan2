@@ -51,11 +51,21 @@ class PostController extends Controller
             $validated['categories'] ?? [],
             fn ($categoryId): bool => $categoryId !== null && $categoryId !== '',
         ));
+        if (filled($validated['new_category'] ?? null)) {
+            $categoryIds[] = Category::query()->firstOrCreate([
+                'name' => trim($validated['new_category']),
+            ])->id;
+        }
         $tagIds = array_values(array_filter(
             $validated['tags'] ?? [],
             fn ($tagId): bool => $tagId !== null && $tagId !== '',
         ));
-        unset($validated['categories'], $validated['tags']);
+        if (filled($validated['new_tag'] ?? null)) {
+            $tagIds[] = Tag::query()->firstOrCreate([
+                'name' => trim($validated['new_tag']),
+            ])->id;
+        }
+        unset($validated['categories'], $validated['tags'], $validated['new_category'], $validated['new_tag']);
         $validated['content'] = $sanitizer->sanitize($validated['content']);
 
         if ($request->hasFile('featured_image')) {
@@ -163,14 +173,24 @@ class PostController extends Controller
             $validated['categories'] ?? [],
             fn ($categoryId): bool => $categoryId !== null && $categoryId !== '',
         ));
+        if (filled($validated['new_category'] ?? null)) {
+            $categoryIds[] = Category::query()->firstOrCreate([
+                'name' => trim($validated['new_category']),
+            ])->id;
+        }
         $tagIds = array_values(array_filter(
             $validated['tags'] ?? [],
             fn ($tagId): bool => $tagId !== null && $tagId !== '',
         ));
+        if (filled($validated['new_tag'] ?? null)) {
+            $tagIds[] = Tag::query()->firstOrCreate([
+                'name' => trim($validated['new_tag']),
+            ])->id;
+        }
         $previousImage = $post->featured_image;
         $previousThumbnail = $post->featured_image_thumbnail;
         $previousMediaId = $post->featured_media_id;
-        unset($validated['categories'], $validated['tags']);
+        unset($validated['categories'], $validated['tags'], $validated['new_category'], $validated['new_tag']);
         $validated['content'] = $sanitizer->sanitize($validated['content']);
 
         if ($request->hasFile('featured_image')) {

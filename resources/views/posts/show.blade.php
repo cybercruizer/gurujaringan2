@@ -113,6 +113,68 @@
                     </div>
                 @endif
 
+                @if ($isPublished)
+                    @php
+                        $shareUrl = urlencode($post->url());
+                        $shareTitle = urlencode($post->title);
+                    @endphp
+                    <section aria-labelledby="share-post-title" class="flex flex-col gap-3 border-t border-[#D5DBEF] pt-6">
+                        <h2 id="share-post-title" class="text-sm font-bold text-[#0B1020]">Bagikan artikel ini</h2>
+                        <div class="flex flex-wrap gap-2">
+                            <a
+                                href="https://wa.me/?text={{ $shareTitle }}%20{{ $shareUrl }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Bagikan ke WhatsApp"
+                                class="inline-flex items-center gap-2 rounded-xl border border-[#D5DBEF] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B2240] transition hover:border-emerald-300 hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB84D]"
+                            >
+                                <span aria-hidden="true" class="flex size-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">W</span>
+                                WhatsApp
+                            </a>
+                            <a
+                                href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Bagikan ke Facebook"
+                                class="inline-flex items-center gap-2 rounded-xl border border-[#D5DBEF] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B2240] transition hover:border-blue-300 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB84D]"
+                            >
+                                <span aria-hidden="true" class="flex size-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800">f</span>
+                                Facebook
+                            </a>
+                            <a
+                                href="https://x.com/intent/post?url={{ $shareUrl }}&amp;text={{ $shareTitle }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Bagikan ke X"
+                                class="inline-flex items-center gap-2 rounded-xl border border-[#D5DBEF] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B2240] transition hover:border-stone-400 hover:bg-stone-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB84D]"
+                            >
+                                <span aria-hidden="true" class="flex size-6 items-center justify-center rounded-full bg-stone-200 text-xs font-bold text-stone-900">X</span>
+                                X
+                            </a>
+                            <a
+                                href="https://t.me/share/url?url={{ $shareUrl }}&amp;text={{ $shareTitle }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Bagikan ke Telegram"
+                                class="inline-flex items-center gap-2 rounded-xl border border-[#D5DBEF] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B2240] transition hover:border-sky-300 hover:bg-sky-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB84D]"
+                            >
+                                <span aria-hidden="true" class="flex size-6 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-800">T</span>
+                                Telegram
+                            </a>
+                            <a
+                                href="https://www.linkedin.com/sharing/share-offsite/?url={{ $shareUrl }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Bagikan ke LinkedIn"
+                                class="inline-flex items-center gap-2 rounded-xl border border-[#D5DBEF] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B2240] transition hover:border-sky-300 hover:bg-sky-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB84D]"
+                            >
+                                <span aria-hidden="true" class="flex size-6 items-center justify-center rounded-full bg-sky-100 text-[10px] font-bold text-sky-800">in</span>
+                                LinkedIn
+                            </a>
+                        </div>
+                    </section>
+                @endif
+
                 @can('update', $post)
                     <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#D5DBEF] bg-white p-4 sm:p-5">
                         <p class="text-sm text-[#5A6482]">You can manage this post.</p>

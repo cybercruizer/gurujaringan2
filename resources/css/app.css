@@ -54,9 +54,66 @@
     }
 
     .rich-content :where(pre) {
-        @apply my-7 overflow-x-auto rounded-2xl border border-[#29344e] bg-[#0b1020] px-5 pb-5 pt-12 text-sm leading-7 text-[#e8edff] shadow-xl;
+        @apply my-7 overflow-x-auto rounded-2xl border border-[#29344e] bg-[#0b1020] px-0 pb-5 pt-12 text-[1.0625rem] leading-[1.85] text-[#e8edff] shadow-xl;
         position: relative;
         tab-size: 4;
+    }
+
+    .rich-content :where(pre code) {
+        @apply block min-w-max;
+        counter-reset: code-line;
+    }
+
+    .rich-content :where(.code-line) {
+        @apply block min-h-[1.85em] border-l-[3px] border-transparent px-5;
+    }
+
+    .rich-content :where(.code-line)::before {
+        @apply mr-5 inline-block w-8 border-r border-[#29344e] pr-3 text-right text-sm text-[#65708d];
+        counter-increment: code-line;
+        content: counter(code-line);
+    }
+
+    .rich-content :where(.code-line:nth-child(even)) {
+        background-color: rgb(255 255 255 / 3%);
+    }
+
+    .rich-content :where(.code-line:hover) {
+        border-left-color: #4b6b9a;
+        background-color: rgb(75 107 154 / 18%);
+    }
+
+    .rich-content :where(.token.comment, .token.prolog, .token.doctype, .token.cdata) {
+        color: #8b96b8;
+        font-style: italic;
+    }
+
+    .rich-content :where(.token.punctuation) {
+        color: #c5cde3;
+    }
+
+    .rich-content :where(.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.attr-name) {
+        color: #ffb86c;
+    }
+
+    .rich-content :where(.token.selector, .token.string, .token.char, .token.attr-value, .token.builtin, .token.inserted) {
+        color: #a5e075;
+    }
+
+    .rich-content :where(.token.operator, .token.entity, .token.url) {
+        color: #78dce8;
+    }
+
+    .rich-content :where(.token.keyword, .token.deleted) {
+        color: #ff79c6;
+    }
+
+    .rich-content :where(.token.function, .token.class-name) {
+        color: #82aaff;
+    }
+
+    .rich-content :where(.token.variable) {
+        color: #f8f8f2;
     }
 
     .rich-content :where(pre[class*='language-'])::before {
@@ -102,6 +159,10 @@
 
     .rich-content :where(pre.language-cpp)::before {
         content: 'C++';
+    }
+
+    .rich-content :where(pre.language-bash)::before {
+        content: 'Bash / Shell';
     }
 
     .rich-content :where(code) {

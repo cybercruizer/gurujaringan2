@@ -101,6 +101,6 @@ class AuthProfileAdminTest extends TestCase
         $this->actingAs($administrator)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Admin dashboard');
+            ->assertSee('Dasbor admin');
     }
 }

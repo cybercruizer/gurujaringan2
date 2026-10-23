@@ -164,6 +164,13 @@
         @error('categories.*')
             <p class="text-sm text-red-700">{{ $message }}</p>
         @enderror
+        <div class="flex flex-col gap-2">
+            <label for="new_category" class="text-sm font-medium text-stone-700">Add a category</label>
+            <input id="new_category" name="new_category" type="text" maxlength="255" value="{{ old('new_category') }}" placeholder="New category name" class="rounded-xl border-stone-300 text-sm shadow-sm focus:border-stone-500 focus:ring-stone-500">
+            @error('new_category')
+                <p class="text-sm text-red-700">{{ $message }}</p>
+            @enderror
+        </div>
     </fieldset>
 
     <fieldset class="flex flex-col gap-3">
@@ -193,6 +200,13 @@
         @error('tags.*')
             <p class="text-sm text-red-700">{{ $message }}</p>
         @enderror
+        <div class="flex flex-col gap-2">
+            <label for="new_tag" class="text-sm font-medium text-stone-700">Add a tag</label>
+            <input id="new_tag" name="new_tag" type="text" maxlength="255" value="{{ old('new_tag') }}" placeholder="New tag name" class="rounded-xl border-stone-300 text-sm shadow-sm focus:border-stone-500 focus:ring-stone-500">
+            @error('new_tag')
+                <p class="text-sm text-red-700">{{ $message }}</p>
+            @enderror
+        </div>
     </fieldset>
 
     <div class="flex flex-col gap-2" data-media-picker data-library-url="{{ route('media.library') }}">

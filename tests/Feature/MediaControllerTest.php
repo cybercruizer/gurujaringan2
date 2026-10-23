@@ -65,6 +65,43 @@ class MediaControllerTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_can_update_media_alt_text_without_changing_its_files(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['is_admin' => true]);
+        $media = $this->createMedia($admin, 'alt-edit');
+        Storage::disk('public')->put($media->path, 'image');
+        Storage::disk('public')->put($media->thumbnail_path, 'thumbnail');
+
+        $this->actingAs($admin)
+            ->put(route('admin.media.update', $media), ['alt_text' => 'A descriptive landscape'])
+            ->assertRedirect(route('admin.media.index'))
+            ->assertSessionHas('status', 'Image alternative text updated.');
+
+        $this->assertSame('A descriptive landscape', $media->fresh()->alt_text);
+        Storage::disk('public')->assertExists($media->path);
+        Storage::disk('public')->assertExists($media->thumbnail_path);
+    }
+
+    public function test_media_alt_text_update_rejects_too_long_text_and_non_admins(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $user = User::factory()->create();
+        $media = $this->createMedia($admin, 'protected-alt');
+
+        $this->actingAs($admin)
+            ->from(route('admin.media.index'))
+            ->put(route('admin.media.update', $media), ['alt_text' => str_repeat('a', 256)])
+            ->assertRedirect(route('admin.media.index'))
+            ->assertSessionHasErrors('alt_text');
+
+        $this->actingAs($user)
+            ->put(route('admin.media.update', $media), ['alt_text' => 'Unauthorized'])
+            ->assertForbidden();
+
+        $this->assertNull($media->fresh()->alt_text);
+    }
+
     public function test_admin_can_delete_an_unused_media_item_and_its_files(): void
     {
         Storage::fake('public');

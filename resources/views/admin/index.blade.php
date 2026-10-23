@@ -120,6 +120,10 @@
             <h2 class="text-xl font-bold tracking-tight text-stone-950">Site management</h2>
         </div>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <a href="{{ route('admin.posts.index') }}" class="flex flex-col gap-2 rounded-2xl border border-stone-200 bg-white p-5 transition hover:border-stone-400">
+                <span class="font-semibold text-stone-950">Articles</span>
+                <span class="text-sm text-stone-600">Review, edit, unpublish, and delete articles and pages.</span>
+            </a>
             <a href="{{ route('admin.categories.index') }}" class="flex flex-col gap-2 rounded-2xl border border-stone-200 bg-white p-5 transition hover:border-stone-400">
                 <span class="font-semibold text-stone-950">Categories</span>
                 <span class="text-sm text-stone-600">Organize articles into topics.</span>

@@ -169,12 +169,18 @@ class BlogSeoTest extends TestCase
             ->assertSee('name="robots" content="index,follow"', false);
     }
 
-    public function test_sitemap_lists_only_published_indexable_posts_and_can_be_disabled(): void
+    public function test_sitemap_index_separates_published_indexable_articles_and_pages(): void
     {
         $author = User::factory()->create();
-        $published = $author->posts()->create([
+        $article = $author->posts()->create([
             'title' => 'Public article',
             'content' => 'Published content.',
+            'published_at' => now()->subDay(),
+        ]);
+        $page = $author->posts()->create([
+            'title' => 'Public page',
+            'type' => 'page',
+            'content' => 'Published page content.',
             'published_at' => now()->subDay(),
         ]);
         $noindex = $author->posts()->create([
@@ -190,7 +196,22 @@ class BlogSeoTest extends TestCase
 
         $this->get(route('sitemap'))
             ->assertOk()
-            ->assertSee($published->url(), false)
+            ->assertSee(route('sitemap.articles'), false)
+            ->assertSee(route('sitemap.pages'), false)
+            ->assertDontSee($article->url(), false)
+            ->assertDontSee($page->url(), false);
+
+        $this->get(route('sitemap.articles'))
+            ->assertOk()
+            ->assertSee($article->url(), false)
+            ->assertDontSee($page->url(), false)
+            ->assertDontSee($noindex->url(), false)
+            ->assertDontSee($draft->url(), false);
+
+        $this->get(route('sitemap.pages'))
+            ->assertOk()
+            ->assertSee($page->url(), false)
+            ->assertDontSee($article->url(), false)
             ->assertDontSee($noindex->url(), false)
             ->assertDontSee($draft->url(), false);
 
@@ -204,6 +225,8 @@ class BlogSeoTest extends TestCase
         ]);
 
         $this->get(route('sitemap'))->assertNotFound();
+        $this->get(route('sitemap.articles'))->assertNotFound();
+        $this->get(route('sitemap.pages'))->assertNotFound();
 
         BlogSetting::query()->firstOrFail()->update([
             'allow_indexing' => false,

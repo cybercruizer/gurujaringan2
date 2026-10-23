@@ -30,6 +30,8 @@ class StorePostRequest extends FormRequest
             'categories.*' => ['nullable', 'integer', 'distinct', 'exists:categories,id'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['nullable', 'integer', 'distinct', 'exists:tags,id'],
+            'new_category' => ['nullable', 'string', 'max:255'],
+            'new_tag' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

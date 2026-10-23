@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMediaRequest;
+use App\Http\Requests\UpdateMediaRequest;
 use App\Models\Media;
 use App\Models\Post;
 use App\Services\PostImageManager;
@@ -43,6 +44,15 @@ class MediaController extends Controller
         return redirect()
             ->route('admin.media.index')
             ->with('status', 'Image added to the media library.');
+    }
+
+    public function update(UpdateMediaRequest $request, Media $media): RedirectResponse
+    {
+        $media->update($request->validated());
+
+        return redirect()
+            ->route('admin.media.index')
+            ->with('status', 'Image alternative text updated.');
     }
 
     public function destroy(Media $media): RedirectResponse

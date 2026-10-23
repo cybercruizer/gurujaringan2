@@ -70,4 +70,55 @@ class TaxonomyPageControllerTest extends TestCase
             ->assertSee('href="'.route('categories.show', $category->slug).'"', false)
             ->assertSee('href="'.route('tags.show', $tag->slug).'"', false);
     }
+
+    public function test_footer_tag_cloud_ranks_tags_by_published_article_count(): void
+    {
+        $author = User::factory()->create();
+        $popularTag = Tag::create(['name' => 'Popular topic']);
+        $otherTag = Tag::create(['name' => 'Another topic']);
+        $pageOnlyTag = Tag::create(['name' => 'Page only topic']);
+        $draftOnlyTag = Tag::create(['name' => 'Draft only topic']);
+
+        foreach (['First public article', 'Second public article'] as $title) {
+            $post = $author->posts()->create([
+                'title' => $title,
+                'content' => 'Public content.',
+                'published_at' => now()->subDay(),
+            ]);
+            $post->tags()->attach($popularTag);
+        }
+
+        $otherPost = $author->posts()->create([
+            'title' => 'Other public article',
+            'content' => 'Public content.',
+            'published_at' => now()->subDay(),
+        ]);
+        $otherPost->tags()->attach($otherTag);
+
+        $page = $author->posts()->create([
+            'title' => 'Public page',
+            'type' => 'page',
+            'content' => 'Page content.',
+            'published_at' => now()->subDay(),
+        ]);
+        $page->tags()->attach($pageOnlyTag);
+
+        $draft = $author->posts()->create([
+            'title' => 'Draft article',
+            'content' => 'Draft content.',
+        ]);
+        $draft->tags()->attach($draftOnlyTag);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Topik populer')
+            ->assertSeeInOrder([
+                route('tags.show', $popularTag->slug),
+                route('tags.show', $otherTag->slug),
+            ], false)
+            ->assertSee('Popular topic, 2 artikel', false)
+            ->assertSee('Another topic, 1 artikel', false)
+            ->assertDontSee(route('tags.show', $pageOnlyTag->slug), false)
+            ->assertDontSee(route('tags.show', $draftOnlyTag->slug), false);
+    }
 }

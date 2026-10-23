@@ -55,10 +55,14 @@
                             <div class="min-w-0">
                                 <p class="truncate text-sm font-semibold text-stone-900" title="{{ $media->original_name }}">{{ $media->original_name }}</p>
                                 <p class="mt-1 text-xs text-stone-500">{{ \Illuminate\Support\Number::fileSize($media->size) }}</p>
-                                @if ($media->alt_text)
-                                    <p class="mt-1 truncate text-xs text-stone-600" title="{{ $media->alt_text }}">{{ $media->alt_text }}</p>
-                                @endif
                             </div>
+                            <form method="POST" action="{{ route('admin.media.update', $media) }}" class="flex flex-col gap-2">
+                                @csrf
+                                @method('PUT')
+                                <label for="alt_text_{{ $media->id }}" class="text-xs font-semibold text-stone-700">Alternative text</label>
+                                <input id="alt_text_{{ $media->id }}" name="alt_text" type="text" maxlength="255" value="{{ $media->alt_text }}" class="min-w-0 rounded-lg border-stone-300 text-xs shadow-sm focus:border-stone-500 focus:ring-stone-500">
+                                <button type="submit" class="rounded-full border border-stone-300 px-3 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100">Save alt text</button>
+                            </form>
                             <form method="POST" action="{{ route('admin.media.destroy', $media) }}" onsubmit="return confirm('Delete this image from the media library?')">
                                 @csrf
                                 @method('DELETE')
