@@ -54,9 +54,9 @@
     }
 
     .rich-content :where(pre) {
-        @apply my-7 overflow-x-auto rounded-2xl border border-[#29344e] bg-[#0b1020] px-0 pb-5 pt-12 text-[1.0625rem] leading-[1.85] text-[#e8edff] shadow-xl;
+        @apply my-7 overflow-x-auto rounded-2xl border border-[#29344e] bg-[#0b1020] px-0 pb-5 pt-12 text-[1.0625rem] leading-none text-[#e8edff] shadow-xl;
         position: relative;
-        tab-size: 4;
+        tab-size: 2;
     }
 
     .rich-content :where(pre code) {
@@ -65,7 +65,7 @@
     }
 
     .rich-content :where(.code-line) {
-        @apply block min-h-[1.85em] border-l-[3px] border-transparent px-5;
+        @apply block min-h-[1em] border-l-[3px] border-transparent px-5;
     }
 
     .rich-content :where(.code-line)::before {
