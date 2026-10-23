@@ -88,7 +88,7 @@ const highlightCode = (pre) => {
     const lines = code.textContent.replace(/\r\n?/g, '\n').split('\n');
     const fragment = document.createDocumentFragment();
 
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
         const lineElement = document.createElement('span');
         lineElement.className = 'code-line';
 
@@ -97,10 +97,6 @@ const highlightCode = (pre) => {
         }
 
         fragment.append(lineElement);
-
-        if (index < lines.length - 1) {
-            fragment.append(document.createTextNode('\n'));
-        }
     });
 
     code.replaceChildren(fragment);
