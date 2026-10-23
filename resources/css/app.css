@@ -1,0 +1,118 @@
+@import 'tailwindcss';
+
+@plugin '@tailwindcss/forms';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../../app/View/**/*.php';
+
+[x-cloak] {
+    display: none !important;
+}
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@layer components {
+    .rich-content :where(h2, h3, h4) {
+        @apply font-bold tracking-tight text-stone-950;
+    }
+
+    .rich-content :where(h2) {
+        @apply mt-8 text-2xl;
+    }
+
+    .rich-content :where(h3) {
+        @apply mt-6 text-xl;
+    }
+
+    .rich-content :where(h4) {
+        @apply mt-5 text-lg;
+    }
+
+    .rich-content :where(p, ul, ol, blockquote, pre) {
+        @apply my-4;
+    }
+
+    .rich-content :where(ul) {
+        @apply list-disc pl-6;
+    }
+
+    .rich-content :where(ol) {
+        @apply list-decimal pl-6;
+    }
+
+    .rich-content :where(a) {
+        @apply text-emerald-800 underline decoration-emerald-300 underline-offset-4;
+    }
+
+    .rich-content :where(blockquote) {
+        @apply border-l-4 border-emerald-700 pl-4 italic text-stone-600;
+    }
+
+    .rich-content :where(pre) {
+        @apply my-7 overflow-x-auto rounded-2xl border border-[#29344e] bg-[#0b1020] px-5 pb-5 pt-12 text-sm leading-7 text-[#e8edff] shadow-xl;
+        position: relative;
+        tab-size: 4;
+    }
+
+    .rich-content :where(pre[class*='language-'])::before {
+        @apply absolute left-0 right-0 top-0 border-b border-[#29344e] px-5 py-2.5 font-sans text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[#9ba8c7];
+        content: 'Code sample';
+    }
+
+    .rich-content :where(pre.language-markup)::before {
+        content: 'HTML / XML';
+    }
+
+    .rich-content :where(pre.language-javascript)::before {
+        content: 'JavaScript';
+    }
+
+    .rich-content :where(pre.language-css)::before {
+        content: 'CSS';
+    }
+
+    .rich-content :where(pre.language-php)::before {
+        content: 'PHP';
+    }
+
+    .rich-content :where(pre.language-ruby)::before {
+        content: 'Ruby';
+    }
+
+    .rich-content :where(pre.language-python)::before {
+        content: 'Python';
+    }
+
+    .rich-content :where(pre.language-java)::before {
+        content: 'Java';
+    }
+
+    .rich-content :where(pre.language-c)::before {
+        content: 'C';
+    }
+
+    .rich-content :where(pre.language-csharp)::before {
+        content: 'C#';
+    }
+
+    .rich-content :where(pre.language-cpp)::before {
+        content: 'C++';
+    }
+
+    .rich-content :where(code) {
+        @apply rounded bg-stone-200 px-1.5 py-0.5 font-mono text-[0.9em];
+    }
+
+    .rich-content :where(pre code) {
+        @apply bg-transparent p-0 text-inherit;
+    }
+
+    .rich-content :where(img) {
+        @apply h-auto max-w-full rounded-xl;
+    }
+}
