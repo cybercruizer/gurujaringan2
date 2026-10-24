@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogSetting;
 use App\Models\Post;
+use Illuminate\Support\Uri;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\SitemapIndex;
 use Spatie\Sitemap\Tags\Url;
@@ -15,15 +16,15 @@ class SitemapController extends Controller
         $this->ensureSitemapIsEnabled();
 
         return SitemapIndex::create()
-            ->add(route('sitemap.articles'))
-            ->add(route('sitemap.pages'));
+            ->add($this->httpsUrl(route('sitemap.articles')))
+            ->add($this->httpsUrl(route('sitemap.pages')));
     }
 
     public function articles(): Sitemap
     {
         $this->ensureSitemapIsEnabled();
 
-        return $this->createSitemap('article')->add(route('home'));
+        return $this->createSitemap('article')->add($this->httpsUrl(route('home')));
     }
 
     public function pages(): Sitemap
@@ -45,11 +46,16 @@ class SitemapController extends Controller
             ->get(['id', 'slug', 'type', 'updated_at'])
             ->each(function (Post $post) use ($sitemap): void {
                 $sitemap->add(
-                    Url::create($post->url())->setLastModificationDate($post->updated_at),
+                    Url::create($this->httpsUrl($post->url()))->setLastModificationDate($post->updated_at),
                 );
             });
 
         return $sitemap;
+    }
+
+    private function httpsUrl(string $url): string
+    {
+        return Uri::of($url)->withScheme('https')->toString();
     }
 
     private function ensureSitemapIsEnabled(): void

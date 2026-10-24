@@ -196,24 +196,30 @@ class BlogSeoTest extends TestCase
 
         $this->get(route('sitemap'))
             ->assertOk()
-            ->assertSee(route('sitemap.articles'), false)
-            ->assertSee(route('sitemap.pages'), false)
+            ->assertSee('https://', false)
+            ->assertDontSee('<loc>http://', false)
+            ->assertSee(str_replace('http://', 'https://', route('sitemap.articles')), false)
+            ->assertSee(str_replace('http://', 'https://', route('sitemap.pages')), false)
             ->assertDontSee($article->url(), false)
             ->assertDontSee($page->url(), false);
 
         $this->get(route('sitemap.articles'))
             ->assertOk()
-            ->assertSee($article->url(), false)
-            ->assertDontSee($page->url(), false)
-            ->assertDontSee($noindex->url(), false)
-            ->assertDontSee($draft->url(), false);
+            ->assertSee(str_replace('http://', 'https://', $article->url()), false)
+            ->assertSee('https://', false)
+            ->assertDontSee('<loc>http://', false)
+            ->assertDontSee(str_replace('http://', 'https://', $page->url()), false)
+            ->assertDontSee(str_replace('http://', 'https://', $noindex->url()), false)
+            ->assertDontSee(str_replace('http://', 'https://', $draft->url()), false);
 
         $this->get(route('sitemap.pages'))
             ->assertOk()
-            ->assertSee($page->url(), false)
-            ->assertDontSee($article->url(), false)
-            ->assertDontSee($noindex->url(), false)
-            ->assertDontSee($draft->url(), false);
+            ->assertSee(str_replace('http://', 'https://', $page->url()), false)
+            ->assertSee('https://', false)
+            ->assertDontSee('<loc>http://', false)
+            ->assertDontSee(str_replace('http://', 'https://', $article->url()), false)
+            ->assertDontSee(str_replace('http://', 'https://', $noindex->url()), false)
+            ->assertDontSee(str_replace('http://', 'https://', $draft->url()), false);
 
         $this->get(route('posts.show', $noindex))
             ->assertOk()
