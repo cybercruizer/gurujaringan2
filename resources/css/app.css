@@ -52,13 +52,13 @@
     .rich-content :where(blockquote) {
         @apply border-l-4 border-emerald-700 pl-4 italic text-stone-600;
     }
-
+    /* Edit 1 */
     .rich-content :where(pre) {
         @apply my-7 overflow-x-auto rounded-2xl border border-[#29344e] bg-[#0b1020] px-0 pb-5 pt-5 pl-3 pr-3 text-[1.0625rem] leading-none text-[#e8edff] shadow-xl;
         position: relative;
         tab-size: 2;
     }
-
+    /* Edit 2 */
     .rich-content :where(pre code) {
         @apply block min-w-max;
         counter-reset: code-line;
@@ -170,7 +170,7 @@
     }
 
     .rich-content :where(pre code) {
-        @apply bg-transparent p-0 text-inherit;
+        @apply bg-transparent p-0 text-inherit pt-7;
     }
 
     .rich-content :where(img) {
