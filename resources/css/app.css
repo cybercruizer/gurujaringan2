@@ -65,7 +65,7 @@
     }
 
     .rich-content :where(.code-line) {
-        @apply block min-h-[1em] border-l-[3px] border-transparent pl-2 pr-5;
+        @apply block min-h-[1em] border-l-[3px] border-transparent px-5;
     }
 
     .rich-content :where(.code-line)::before {
@@ -170,7 +170,7 @@
     }
 
     .rich-content :where(pre code) {
-        @apply bg-transparent p-0 text-inherit pt-9;
+        @apply bg-transparent p-0 text-inherit pt-7;
     }
 
     .rich-content :where(img) {
