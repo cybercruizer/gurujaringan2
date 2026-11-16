@@ -35,6 +35,7 @@ class ArticleBackupManager
      */
     public function export(): string
     {
+        /** @var Collection<int, Post> $posts */
         $posts = Post::query()
             ->where('type', 'article')
             ->with(['categories', 'tags', 'comments.user', 'featuredMedia'])
@@ -66,7 +67,31 @@ class ArticleBackupManager
             ];
             $encodedManifest = json_encode($manifest, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-            if (! $archive->addFromString('backup.json', $encodedManifest) || ! $archive->close()) {
+            if (strlen($encodedManifest) > self::MAX_MANIFEST_BYTES) {
+                throw new RuntimeException('The article backup manifest exceeds the supported size limit.');
+            }
+
+            if (! $archive->addFromString('backup.json', $encodedManifest) || $archive->numFiles > 10000) {
+                throw new RuntimeException('The article backup archive could not be completed.');
+            }
+
+            $uncompressedSize = 0;
+
+            for ($index = 0; $index < $archive->numFiles; $index++) {
+                $stat = $archive->statIndex($index);
+
+                if ($stat === false) {
+                    throw new RuntimeException('The article backup archive could not be verified.');
+                }
+
+                $uncompressedSize += $stat['size'];
+
+                if ($uncompressedSize > self::MAX_ARCHIVE_BYTES) {
+                    throw new RuntimeException('The article backup exceeds the supported 100 MB size limit.');
+                }
+            }
+
+            if (! $archive->close()) {
                 throw new RuntimeException('The article backup archive could not be completed.');
             }
         } catch (Throwable $exception) {
@@ -97,6 +122,13 @@ class ArticleBackupManager
                 foreach ($manifest['media'] as $media) {
                     $imageContents = $this->archiveContents($manifest['_archive'], $media['file']);
                     $thumbnailContents = $this->archiveContents($manifest['_archive'], $media['thumbnail_file']);
+                    $imageMimeType = (new \finfo(FILEINFO_MIME_TYPE))->buffer($imageContents);
+                    $thumbnailMimeType = (new \finfo(FILEINFO_MIME_TYPE))->buffer($thumbnailContents);
+
+                    if ($imageMimeType !== $media['mime_type'] || $thumbnailMimeType !== 'image/webp') {
+                        $this->rejectImport('backup', 'The backup archive contains a media file with an invalid image type.');
+                    }
+
                     $imageHash = hash('sha256', $imageContents);
                     $thumbnailHash = hash('sha256', $thumbnailContents);
                     $imageExtension = $this->imageExtension($media['mime_type']);
@@ -133,7 +165,7 @@ class ArticleBackupManager
                     ];
                     $mediaByOriginalPath[$media['thumbnail_path']] = [
                         'record' => $record,
-                        'path' => $path,
+                        'path' => $thumbnailPath,
                         'thumbnail_path' => $thumbnailPath,
                     ];
                 }
@@ -155,7 +187,9 @@ class ArticleBackupManager
                     $content = $this->rewriteMediaReferences($article['content'], $manifest, $mediaByOriginalPath);
                     $featuredImage = $this->mappedMediaPath($article['featured_image'], $mediaByOriginalPath);
                     $featuredThumbnail = $this->mappedMediaPath($article['featured_image_thumbnail'], $mediaByOriginalPath);
-                    $featuredMediaPath = $this->mappedMediaPath($article['featured_media_path'], $mediaByOriginalPath);
+                    $featuredMedia = $article['featured_media_path'] === null
+                        ? null
+                        : ($mediaByOriginalPath[$article['featured_media_path']] ?? null);
 
                     $post->forceFill([
                         'user_id' => $isNew ? $user->getKey() : $post->user_id,
@@ -166,9 +200,7 @@ class ArticleBackupManager
                         'excerpt' => $article['excerpt'],
                         'featured_image' => $featuredImage,
                         'featured_image_thumbnail' => $featuredThumbnail,
-                        'featured_media_id' => $featuredMediaPath === null
-                            ? null
-                            : ($mediaByOriginalPath[$article['featured_media_path']]['record']->getKey() ?? null),
+                        'featured_media_id' => $featuredMedia === null ? null : $featuredMedia['record']->getKey(),
                         'published_at' => $article['published_at'],
                         'seo_title' => $article['seo_title'],
                         'seo_description' => $article['seo_description'],
@@ -177,11 +209,11 @@ class ArticleBackupManager
                     ])->save();
 
                     $post->categories()->sync(array_map(
-                        fn (string $slug): int => $categoryIds[$slug],
+                        fn (array $category): int => $categoryIds[$category['slug']],
                         $article['categories'],
                     ));
                     $post->tags()->sync(array_map(
-                        fn (string $slug): int => $tagIds[$slug],
+                        fn (array $tag): int => $tagIds[$tag['slug']],
                         $article['tags'],
                     ));
 
@@ -284,6 +316,11 @@ class ArticleBackupManager
 
         if (! is_string($imageContents) || ! is_string($thumbnailContents)) {
             throw new RuntimeException("The media files for {$media->original_name} could not be read for the backup.");
+        }
+
+        if (strlen($imageContents) > self::MAX_MEDIA_FILE_BYTES
+            || strlen($thumbnailContents) > self::MAX_MEDIA_FILE_BYTES) {
+            throw new RuntimeException("The media files for {$media->original_name} exceed the supported 10 MB per-file limit.");
         }
 
         $file = "media/{$media->getKey()}/".basename($media->path);
@@ -390,7 +427,7 @@ class ArticleBackupManager
             'format' => ['required', 'string'],
             'version' => ['required', 'integer'],
             'source_url' => ['required', 'string', 'max:2048'],
-            'articles' => ['required', 'array', 'max:10000'],
+            'articles' => ['present', 'array', 'max:10000'],
             'articles.*.title' => ['required', 'string', 'max:255'],
             'articles.*.slug' => ['required', 'string', 'max:255'],
             'articles.*.content' => ['required', 'string', 'max:200000'],
@@ -403,14 +440,14 @@ class ArticleBackupManager
             'articles.*.seo_description' => ['nullable', 'string', 'max:320'],
             'articles.*.seo_noindex' => ['required', 'boolean'],
             'articles.*.comments_enabled' => ['required', 'boolean'],
-            'articles.*.categories' => ['required', 'array'],
+            'articles.*.categories' => ['present', 'array'],
             'articles.*.categories.*.name' => ['required', 'string', 'max:255'],
             'articles.*.categories.*.slug' => ['required', 'string', 'max:255'],
             'articles.*.categories.*.description' => ['nullable', 'string'],
-            'articles.*.tags' => ['required', 'array'],
+            'articles.*.tags' => ['present', 'array'],
             'articles.*.tags.*.name' => ['required', 'string', 'max:255'],
             'articles.*.tags.*.slug' => ['required', 'string', 'max:255'],
-            'articles.*.comments' => ['required', 'array'],
+            'articles.*.comments' => ['present', 'array'],
             'articles.*.comments.*.id' => ['required', 'string', 'max:100'],
             'articles.*.comments.*.parent_id' => ['nullable', 'string', 'max:100'],
             'articles.*.comments.*.author_name' => ['nullable', 'string', 'max:255'],
@@ -419,7 +456,7 @@ class ArticleBackupManager
             'articles.*.comments.*.approved_at' => ['nullable', 'date'],
             'articles.*.comments.*.created_at' => ['nullable', 'date'],
             'articles.*.comments.*.updated_at' => ['nullable', 'date'],
-            'media' => ['required', 'array'],
+            'media' => ['present', 'array'],
             'media.*.path' => ['required', 'string', 'max:1000'],
             'media.*.thumbnail_path' => ['required', 'string', 'max:1000'],
             'media.*.url' => ['required', 'string', 'max:2048'],
@@ -432,8 +469,28 @@ class ArticleBackupManager
 
         if ($validator->fails()) {
             throw ValidationException::withMessages([
-                'backup' => 'The backup archive contains invalid article data.',
+                'backup' => 'The backup archive contains invalid article data: '.implode(' ', $validator->errors()->all()),
             ]);
+        }
+
+        foreach ($manifest['articles'] as $article) {
+            $commentIds = array_column($article['comments'], 'id');
+
+            if (count($commentIds) !== count(array_unique($commentIds))) {
+                $this->rejectImport('backup', 'The backup contains duplicate comment identifiers.');
+            }
+        }
+
+        $mediaPaths = [];
+
+        foreach ($manifest['media'] as $media) {
+            foreach ([$media['path'], $media['thumbnail_path']] as $path) {
+                if (isset($mediaPaths[$path])) {
+                    $this->rejectImport('backup', 'The backup contains duplicate media paths.');
+                }
+
+                $mediaPaths[$path] = true;
+            }
         }
     }
 
@@ -521,7 +578,7 @@ class ArticleBackupManager
             }
 
             if ($restoredCount === 0) {
-                throw new RuntimeException('The backup contains a comment reply with a missing or circular parent.');
+                $this->rejectImport('backup', 'The backup contains a comment reply with a missing or circular parent.');
             }
         }
     }
