@@ -32,6 +32,9 @@ Route::get('/', function () {
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/sitemap-articles.xml', [SitemapController::class, 'articles'])->name('sitemap.articles');
 Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
+Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
+Route::get('/sitemap-tags.xml', [SitemapController::class, 'tags'])->name('sitemap.tags');
+Route::get('/sitemap-media.xml', [SitemapController::class, 'media'])->name('sitemap.media');
 Route::get('/search', SiteSearchController::class)->name('search');
 Route::get('/categories/{category:slug}', [TaxonomyPageController::class, 'category'])->name('categories.show');
 Route::get('/tags/{tag:slug}', [TaxonomyPageController::class, 'tag'])->name('tags.show');

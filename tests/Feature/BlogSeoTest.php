@@ -3,9 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\BlogSetting;
+use App\Models\Category;
+use App\Models\Media;
 use App\Models\Post;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class BlogSeoTest extends TestCase
@@ -237,6 +241,9 @@ class BlogSeoTest extends TestCase
         $this->get(route('sitemap'))->assertNotFound();
         $this->get(route('sitemap.articles'))->assertNotFound();
         $this->get(route('sitemap.pages'))->assertNotFound();
+        $this->get(route('sitemap.categories'))->assertNotFound();
+        $this->get(route('sitemap.tags'))->assertNotFound();
+        $this->get(route('sitemap.media'))->assertNotFound();
 
         BlogSetting::query()->firstOrFail()->update([
             'allow_indexing' => false,
@@ -247,5 +254,62 @@ class BlogSeoTest extends TestCase
             ->assertOk()
             ->assertSee('name="robots" content="noindex,nofollow"', false);
         $this->get(route('sitemap'))->assertNotFound();
+    }
+
+    public function test_sitemap_index_lists_public_taxonomy_archives_and_media_files(): void
+    {
+        Storage::fake('public');
+
+        $author = User::factory()->create();
+        $category = Category::create(['name' => 'Networking']);
+        $tag = Tag::create(['name' => 'Guides']);
+        $article = $author->posts()->create([
+            'title' => 'Public networking guide',
+            'content' => 'Public content.',
+            'published_at' => now()->subDay(),
+        ]);
+        $article->categories()->attach($category);
+        $article->tags()->attach($tag);
+
+        $draftCategory = Category::create(['name' => 'Draft only']);
+        $draftTag = Tag::create(['name' => 'Draft tag']);
+        $draft = $author->posts()->create([
+            'title' => 'Draft networking guide',
+            'content' => 'Private content.',
+        ]);
+        $draft->categories()->attach($draftCategory);
+        $draft->tags()->attach($draftTag);
+
+        $media = Media::query()->create([
+            'user_id' => $author->id,
+            'path' => 'media/networking-guide.webp',
+            'thumbnail_path' => 'media/thumbnails/networking-guide.webp',
+            'original_name' => 'networking-guide.webp',
+            'mime_type' => 'image/webp',
+            'size' => 1024,
+        ]);
+
+        $this->get(route('sitemap'))
+            ->assertOk()
+            ->assertSee(str_replace('http://', 'https://', route('sitemap.categories')), false)
+            ->assertSee(str_replace('http://', 'https://', route('sitemap.tags')), false)
+            ->assertSee(str_replace('http://', 'https://', route('sitemap.media')), false);
+
+        $this->get(route('sitemap.categories'))
+            ->assertOk()
+            ->assertSee(str_replace('http://', 'https://', route('categories.show', $category->slug)), false)
+            ->assertDontSee(route('categories.show', $draftCategory->slug), false)
+            ->assertDontSee('<loc>http://', false);
+
+        $this->get(route('sitemap.tags'))
+            ->assertOk()
+            ->assertSee(str_replace('http://', 'https://', route('tags.show', $tag->slug)), false)
+            ->assertDontSee(route('tags.show', $draftTag->slug), false)
+            ->assertDontSee('<loc>http://', false);
+
+        $this->get(route('sitemap.media'))
+            ->assertOk()
+            ->assertSee(str_replace('http://', 'https://', url($media->url())), false)
+            ->assertDontSee('<loc>http://', false);
     }
 }
