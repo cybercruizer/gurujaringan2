@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ArticleBackupController;
 use App\Http\Controllers\Admin\BlogSettingController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -58,6 +59,9 @@ Route::post('/posts/{post}/comments', [CommentController::class, 'store'])
     ->name('comments.store');
 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/article-backups', [ArticleBackupController::class, 'index'])->name('article-backups.index');
+    Route::get('/article-backups/export', [ArticleBackupController::class, 'export'])->name('article-backups.export');
+    Route::post('/article-backups/import', [ArticleBackupController::class, 'import'])->name('article-backups.import');
     Route::get('/settings/seo', [BlogSettingController::class, 'edit'])->name('settings.seo.edit');
     Route::put('/settings/seo', [BlogSettingController::class, 'update'])->name('settings.seo.update');
     Route::resource('categories', CategoryController::class)->except(['show']);

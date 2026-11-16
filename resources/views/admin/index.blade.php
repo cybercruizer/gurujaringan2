@@ -124,6 +124,10 @@
                 <span class="font-semibold text-stone-950">Articles</span>
                 <span class="text-sm text-stone-600">Review, edit, unpublish, and delete articles and pages.</span>
             </a>
+            <a href="{{ route('admin.article-backups.index') }}" class="flex flex-col gap-2 rounded-2xl border border-stone-200 bg-white p-5 transition hover:border-stone-400">
+                <span class="font-semibold text-stone-950">Article backup</span>
+                <span class="text-sm text-stone-600">Export and restore articles with taxonomy, comments, and referenced images.</span>
+            </a>
             <a href="{{ route('admin.categories.index') }}" class="flex flex-col gap-2 rounded-2xl border border-stone-200 bg-white p-5 transition hover:border-stone-400">
                 <span class="font-semibold text-stone-950">Categories</span>
                 <span class="text-sm text-stone-600">Organize articles into topics.</span>
