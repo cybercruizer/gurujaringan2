@@ -139,7 +139,11 @@ class BlogSeoTest extends TestCase
             ->get(route('posts.create'))
             ->assertOk()
             ->assertSee('SEO settings')
-            ->assertSee('name="seo_title"', false);
+            ->assertSee('data-seo-counter="post-title"', false)
+            ->assertSee('name="seo_title"', false)
+            ->assertSee('data-seo-counter="title"', false)
+            ->assertSee('data-seo-counter="description"', false)
+            ->assertSee('data-seo-counter="excerpt"', false);
 
         $this->post(route('posts.store'), [
             'title' => 'Search-friendly story',

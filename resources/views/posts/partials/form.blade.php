@@ -29,6 +29,7 @@
     <div class="flex flex-col gap-2">
         <label for="title" class="text-sm font-semibold text-stone-800">Title</label>
         <input id="title" name="title" type="text" value="{{ old('title', $post->title) }}" required maxlength="255" class="rounded-xl border-stone-300 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500">
+        <p data-seo-counter="post-title" role="status" aria-live="polite" class="text-xs text-stone-500">Recommended: 50–60 characters.</p>
         @error('title')
             <p class="text-sm text-red-700">{{ $message }}</p>
         @enderror
@@ -60,6 +61,7 @@
     <div class="flex flex-col gap-2">
         <label for="excerpt" class="text-sm font-semibold text-stone-800">Excerpt <span class="font-normal text-stone-500">(optional)</span></label>
         <textarea id="excerpt" name="excerpt" rows="3" maxlength="1000" class="rounded-xl border-stone-300 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500">{{ old('excerpt', $post->excerpt) }}</textarea>
+        <p data-seo-counter="excerpt" role="status" aria-live="polite" class="text-xs text-stone-500">Recommended: 120–160 characters.</p>
         @error('excerpt')
             <p class="text-sm text-red-700">{{ $message }}</p>
         @enderror
@@ -71,6 +73,7 @@
             <div class="flex flex-col gap-2">
                 <label for="seo_title" class="text-sm font-semibold text-stone-800">Search title <span class="font-normal text-stone-500">(optional)</span></label>
                 <input id="seo_title" name="seo_title" type="text" value="{{ old('seo_title', $post->seo_title) }}" maxlength="255" class="rounded-xl border-stone-300 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500">
+                <p data-seo-counter="title" role="status" aria-live="polite" class="text-xs text-stone-500">Recommended: 50–60 characters.</p>
                 @error('seo_title')
                     <p class="text-sm text-red-700">{{ $message }}</p>
                 @enderror
@@ -78,6 +81,7 @@
             <div class="flex flex-col gap-2">
                 <label for="seo_description" class="text-sm font-semibold text-stone-800">Search description <span class="font-normal text-stone-500">(optional, max 320 characters)</span></label>
                 <textarea id="seo_description" name="seo_description" rows="3" maxlength="320" class="rounded-xl border-stone-300 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500">{{ old('seo_description', $post->seo_description) }}</textarea>
+                <p data-seo-counter="description" role="status" aria-live="polite" class="text-xs text-stone-500">Recommended: 120–160 characters.</p>
                 @error('seo_description')
                     <p class="text-sm text-red-700">{{ $message }}</p>
                 @enderror

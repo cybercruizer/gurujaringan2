@@ -39,6 +39,11 @@ export const initializePostEditor = (editors) => {
             block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3; Heading 4=h4; Preformatted=pre',
             toolbar_mode: 'sliding',
             setup: (editor) => {
+                editor.on('input change undo redo SetContent', () => {
+                    element.value = editor.getContent();
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+
                 editor.ui.registry.addButton('media_library', {
                     text: 'Media library',
                     onAction: () => {
