@@ -36,6 +36,23 @@
             @endforeach
 
             @auth
+                <a
+                    href="{{ Auth::user()->is_admin ? route('admin.dashboard') : route('dashboard') }}"
+                    class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-stone-700 transition hover:bg-stone-100"
+                >
+                    <svg aria-hidden="true" class="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        @if (Auth::user()->is_admin)
+                            <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke-width="1.8" />
+                            <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" stroke-width="1.8" />
+                            <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" stroke-width="1.8" />
+                            <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" stroke-width="1.8" />
+                        @else
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.5 4.5h17v15h-17zM3.5 9.5h17M9 9.5v10" />
+                        @endif
+                    </svg>
+                    <span>{{ Auth::user()->is_admin ? 'Dasbor Admin' : 'Dasbor' }}</span>
+                </a>
+
                 {{-- @if (Auth::user()->is_admin)
                     <details class="group relative">
                         <summary class="flex cursor-pointer list-none items-center gap-1 rounded-lg px-3 py-2 text-stone-700 hover:bg-stone-100 [&::-webkit-details-marker]:hidden">
@@ -96,6 +113,25 @@
         </div>
 
         <div class="flex items-center gap-2 md:hidden">
+            @auth
+                <a
+                    href="{{ Auth::user()->is_admin ? route('admin.dashboard') : route('dashboard') }}"
+                    aria-label="{{ Auth::user()->is_admin ? 'Dasbor Admin' : 'Dasbor' }}"
+                    class="inline-flex h-10 items-center gap-2 rounded-lg border border-stone-200 px-3 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+                >
+                    <svg aria-hidden="true" class="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        @if (Auth::user()->is_admin)
+                            <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke-width="1.8" />
+                            <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" stroke-width="1.8" />
+                            <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" stroke-width="1.8" />
+                            <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" stroke-width="1.8" />
+                        @else
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.5 4.5h17v15h-17zM3.5 9.5h17M9 9.5v10" />
+                        @endif
+                    </svg>
+                    <span>{{ Auth::user()->is_admin ? 'Admin' : 'Dasbor' }}</span>
+                </a>
+            @endauth
             <button
                 type="button"
                 aria-label="Cari di situs"

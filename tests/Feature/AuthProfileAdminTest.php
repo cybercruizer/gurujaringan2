@@ -103,4 +103,25 @@ class AuthProfileAdminTest extends TestCase
             ->assertOk()
             ->assertSee('Dasbor admin');
     }
+
+    public function test_authenticated_users_get_a_direct_link_to_their_dashboard(): void
+    {
+        $regularUser = User::factory()->create();
+
+        $this->actingAs($regularUser)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('href="'.route('dashboard').'"', false)
+            ->assertSee('aria-label="Dasbor"', false)
+            ->assertDontSee('href="'.route('admin.dashboard').'"', false);
+
+        $administrator = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($administrator)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('href="'.route('admin.dashboard').'"', false)
+            ->assertSee('aria-label="Dasbor Admin"', false)
+            ->assertDontSee('href="'.route('dashboard').'" aria-label="Dasbor"', false);
+    }
 }
